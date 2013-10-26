@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Get the United States county for a United States address.">
+    <meta name="author" content="Tom von Clef">
+    <meta name="shoutout" content="Eliot Watson">
+    <!-- <link rel="shortcut icon" href="ico/favicon.png"> -->
+
+    <title>What's My County?</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/index.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.js"></script>
+      <script src="js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" 
+                  data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">WhatsMyCounty.com</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <h1>What's My County?</h1>
+        <p class="lead">Wonder what your county is? Type an address and find out.</p>
+        <input id="tbAddress" type="text" placeholder="Enter U.S address">
+        <button id="btnGetCounty">Get County</button><br>
+        <div id="divCounty"></div>
+      </div>
+
+    </div><!-- /.container -->
+
+    <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+    <script>
+$(document).ready(function() {
+    $('#btnGetCounty').click(function() {
+        var geocoder = new google.maps.Geocoder();
+        var address = $('#tbAddress').val();
+        
+        if (geocoder) {
+            geocoder.geocode({ 'address': address }, 
+            function (results, status) {
+                $('#divCounty').text('');
+                if (status == google.maps.GeocoderStatus.OK) {
+                    $.each(results[0].address_components, function(index, value) {
+                        if(value.types[0] === "administrative_area_level_2") {
+                            $('#divCounty').text(value.long_name + ' ' + 'County');
+                        }
+                    });
+                }
+                else {
+                    $('#divCounty').text(status);
+                }
+            });
+        }
+    });
+    
+    $("#tbAddress").keyup(function(event){
+        if(event.keyCode == 13){
+            $("#btnGetCounty").click();
+        }
+    });
+}); 
+    </script>
+  </body>
+</html>
+
+
