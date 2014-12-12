@@ -103,7 +103,7 @@ $(document).ready(function() {
                     $.each(results[0].address_components, function(index, value) {
                         if(value.types[0] === "administrative_area_level_2") {
                             $('#divFullAddress').text(results[0].formatted_address);
-                            $('#divCounty').text(value.long_name + ' ' + 'County');
+                            $('#divCounty').text(value.long_name);
                             
                             window.map.setCenter(results[0].geometry.location);
                             window.map.setZoom(12);
