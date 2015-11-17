@@ -8,7 +8,7 @@
     <meta name="shoutout" content="Eliot Watson">
     <!-- <link rel="shortcut icon" href="ico/favicon.png"> -->
 
-    <title>What's My County?</title>
+    <title>What's the County?</title>
 
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.css" rel="stylesheet">
@@ -34,7 +34,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">WhatsMyCounty.com</a>
+          <a class="navbar-brand" href="#">WhatsTheCounty.com</a>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -50,13 +50,28 @@
 
     <div class="container">
         <div class="content fill">
-            <h1>What's My County?</h1>
-            <p class="lead">Wonder what your county is? Enter an address and find out.</p>
+            <h1>What's the County?</h1>
+            <p class="lead">
+                Have an address? Wonder what the county is? Enter the address below and find out.<br>
+                (Data provided by <a href="https://developers.google.com/maps" target="_blank">Google Maps APIs</a>).
+            </p>
+
             <input id="tbAddress" type="text" style="width: 300px" placeholder="Enter U.S address">
             <button id="btnGetCounty">Get County</button><br>
 
             <div id="divCounty" style="margin:30px;margin-bottom:10px;font-size:24px;"></div>
-            <div id="divFullAddress" style="margin-top: 10px"></div>
+
+            <div id="divTextResults" class="well" style="font-size: 16px; display: none">
+                <div id="divFullAddress" style="margin-top: 10px; display: inline"></div>
+                <div id="divFullAddressExtra" style="display:inline">
+                    <button type="button" class="btn btn-sm" id="latLongPopover"
+                            data-toggle="popover" title="Latitude and Longitude" data-content="">
+                       <span class="glyphicon glyphicon-question-sign"></span>
+                   </button>
+                </div>
+                <div style="margin: 8px; font-style: italic">is in</div>
+                <div id="divCountyName"></div>
+            </div>
 
             <div id="map-canvas" style="width: 100%; height: 100%"></div>
             <br>
@@ -64,7 +79,11 @@
             <div id="map-embed" style="width:100%;height:100%">
                 <iframe id="map-embed-iframe" width="100%" height="100%" frameborder="0" 
                         scrolling="no" marginheight="0" marginwidth="0"></iframe>
-            <div>
+            </div>
+
+            <div class="">
+                <p class="text-center" style="margin: 20px;">Copyright © 2015 <a href="https://github.com/tomvonclef" target="_blank">Tom von Clef</a></p>
+            </div>
         </div><!-- /.content -->
     </div><!-- /.container -->
 
@@ -72,78 +91,91 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
     <script>
-function createMapEmbedSrc(county) {
-    return 'http://maps.google.com/maps?f=q&source=s_q&hl=en&q=' +
-                county + '+county&ie=UTF8&z=10&t=m&output=embed';
-}
-
-function initGMap() {
-    var mapOptions = {
-                     center: new google.maps.LatLng(39.80, -98.55),
-                     zoom: 4,
-                     mapTypeId: google.maps.MapTypeId.ROADMAP
-    };
-    window.map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-};
-
-google.maps.visualRefresh = false;
-google.maps.event.addDomListener(window, 'load', initGMap);
-
-$(document).ready(function() {
-    
-    $('#btnGetCounty').click(function() {
-        var geocoder = new google.maps.Geocoder();
-        var address = $('#tbAddress').val();
-        
-        if (geocoder) {
-            geocoder.geocode({ 'address': address }, 
-            function (results, status) {
-                $('#divCounty').text('');
-                if (status == google.maps.GeocoderStatus.OK) {
-                    $.each(results[0].address_components, function(index, value) {
-                        if(value.types[0] === "administrative_area_level_2") {
-                            $('#divFullAddress').text(results[0].formatted_address);
-                            $('#divCounty').text(value.long_name);
-                            
-                            window.map.setCenter(results[0].geometry.location);
-                            window.map.setZoom(12);
-
-                            if(window.marker) {
-                                window.marker.setMap(null);
-                            }
-
-                            window.marker = new google.maps.Marker({
-                                position: results[0].geometry.location,
-                                map: window.map,
-                                title: results[0].formatted_address
-                            });
-
-                            window.infowindow = new google.maps.InfoWindow({
-                                content: '<p>' + results[0].formatted_address + '</p>'
-                            });
-
-                            window.infowindow.open(window.map, window.marker);
-
-                            $('#map-embed-iframe').attr('src', createMapEmbedSrc(value.long_name));
-                            
-                        }
-                    });
-                }
-                else {
-                    $('#divCounty').text(status);
-                }
-            });
+        function createMapEmbedSrc(county) {
+            return 'http://maps.google.com/maps?f=q&source=s_q&hl=en&q=' +
+                        county + '+county&ie=UTF8&z=10&t=m&output=embed';
         }
-    });
-    
-    $("#tbAddress").keyup(function(event){
-        if(event.keyCode == 13){
-            $("#btnGetCounty").click();
+
+        function initGMap() {
+            var mapOptions = {
+                center: new google.maps.LatLng(39.80, -98.55), // Geographic center of the continental USA
+                zoom: 4,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            window.map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
         }
-    });
-}); 
+
+        google.maps.visualRefresh = false;
+        google.maps.event.addDomListener(window, 'load', initGMap);
+
+        $(document).ready(function() {
+             var $divCounty = $('divCounty');
+
+             $('#btnGetCounty').click(function() {
+                 var geocoder = new google.maps.Geocoder();
+                 var address = $('#tbAddress').val();
+
+                 if (geocoder) {
+                     geocoder.geocode({ 'address': address },
+                         function (results, status) {
+                             $divCounty.text('');
+                             if (status == google.maps.GeocoderStatus.OK) {
+                                 $.each(results[0].address_components, function(index, value) {
+                                     if(value.types[0] === "administrative_area_level_2") {
+                                         $('#divTextResults').show();
+
+                                         $('#divFullAddress').text(results[0].formatted_address);
+
+                                         $divCounty.text(value.long_name);
+
+                                         window.map.setCenter(results[0].geometry.location);
+                                         window.map.setZoom(12);
+
+                                         if(window.marker) {
+                                             window.marker.setMap(null);
+                                         }
+
+                                         window.marker = new google.maps.Marker({
+                                             position: results[0].geometry.location,
+                                             map: window.map,
+                                             title: results[0].formatted_address
+                                         });
+
+                                         window.infowindow = new google.maps.InfoWindow({
+                                             content: '<p>' + results[0].formatted_address + '</p>'
+                                         });
+
+                                         window.infowindow.open(window.map, window.marker);
+
+                                         $('#divCountyName').text(value.long_name);
+
+                                         $('#map-embed-iframe').attr('src', createMapEmbedSrc(value.long_name));
+
+                                         var $latLongPopover = $('#latLongPopover');
+
+                                         $latLongPopover.attr('data-content',
+                                             'Lat: ' + Math.round(results[0].geometry.location.lat()*1000)/1000 + '<br>' +
+                                             'Long: ' + Math.round(results[0].geometry.location.lng()*1000)/1000
+                                         );
+
+                                         $latLongPopover.popover({html: true});
+                                     }
+                                 });
+                             }
+                             else {
+                                 $divCounty.text(status);
+                             }
+                         });
+                 }
+             });
+
+             $("#tbAddress").keyup(function(event) {
+                 if(event.keyCode == 13) {
+                     $("#btnGetCounty").click();
+                 }
+             });
+        });
     </script>
   </body>
 </html>
-
 
