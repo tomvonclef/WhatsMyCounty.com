@@ -149,7 +149,9 @@
 
                                          $('#divCountyName').text(value.long_name);
 
-                                         $('#map-embed-iframe').attr('src', createMapEmbedSrc(value.long_name));
+                                         $('#map-embed-iframe').attr('src', createMapEmbedSrc(
+                                                 value.long_name + ', ' + results[0].address_components[5]
+                                         ));
 
                                          var $latLongPopover = $('#latLongPopover');
 
