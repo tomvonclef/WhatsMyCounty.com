@@ -115,7 +115,7 @@
              // Initialize settings then hide
              $latLongPopover.popover({html: true});
              $latLongPopover.popover('hide');
-            
+
              $('#btnGetCounty').click(function() {
 
                  // Hide popover if still showing
@@ -129,8 +129,11 @@
                          function (results, status) {
                              $divCounty.text('');
                              if (status == google.maps.GeocoderStatus.OK) {
+                                 var foundCounty = false;
                                  $.each(results[0].address_components, function(index, value) {
                                      if(value.types[0] === "administrative_area_level_2") {
+                                         foundCounty = true;
+
                                          $('#divTextResults').show();
 
                                          $('#divFullAddress').text(results[0].formatted_address);
@@ -178,9 +181,13 @@
                                          $latLongPopover.popover({html: true});
                                      }
                                  });
+
+                                 if(foundCounty === false) {
+                                     alert("Could not find county for address: \"" + address +"\"");
+                                 }
                              }
                              else {
-                                 $divCounty.text(status);
+                                 alert("Geocode was not successful for the following reason: " + status);
                              }
                          });
                  }
