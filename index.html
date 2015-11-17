@@ -154,8 +154,8 @@
                                          var $latLongPopover = $('#latLongPopover');
 
                                          $latLongPopover.attr('data-content',
-                                             'Lat: ' + Math.round(results[0].geometry.location.lat()*1000)/1000 + '<br>' +
-                                             'Long: ' + Math.round(results[0].geometry.location.lng()*1000)/1000
+                                             'Lat: ' +  results[0].geometry.location.lat() + '<br>' +
+                                             'Long: ' + results[0].geometry.location.lng()
                                          );
 
                                          $latLongPopover.popover({html: true});
