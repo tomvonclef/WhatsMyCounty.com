@@ -110,8 +110,17 @@
 
         $(document).ready(function() {
              var $divCounty = $('divCounty');
+             var $latLongPopover = $('#latLongPopover');
 
+             // Initialize settings then hide
+             $latLongPopover.popover({html: true});
+             $latLongPopover.popover('hide');
+            
              $('#btnGetCounty').click(function() {
+
+                 // Hide popover if still showing
+                 $latLongPopover.popover('hide');
+
                  var geocoder = new google.maps.Geocoder();
                  var address = $('#tbAddress').val();
 
@@ -160,8 +169,6 @@
                                          $('#map-embed-iframe').attr('src', createMapEmbedSrc(
                                              value.long_name + (state ?  ', ' + state : '')
                                          ));
-
-                                         var $latLongPopover = $('#latLongPopover');
 
                                          $latLongPopover.attr('data-content',
                                              'Lat: ' +  results[0].geometry.location.lat() + '<br>' +
