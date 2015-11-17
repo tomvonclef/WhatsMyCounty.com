@@ -149,8 +149,16 @@
 
                                          $('#divCountyName').text(value.long_name);
 
+                                         // Set State county is in.
+                                         var state = null;
+                                         $.each(results[0].address_components, function(index, value) {
+                                             if(value.types[0] === "administrative_area_level_1") {
+                                                 state = value ? value.short_name : null;
+                                             }
+                                         });
+
                                          $('#map-embed-iframe').attr('src', createMapEmbedSrc(
-                                                 value.long_name + ', ' + results[0].address_components[5]
+                                             value.long_name + (state ?  ', ' + state : '')
                                          ));
 
                                          var $latLongPopover = $('#latLongPopover');
